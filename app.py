@@ -4,7 +4,8 @@ import pandas as pd
 import plotly.express as px
 import sqlalchemy
 
-application = Dash(__name__)
+app = Dash(__name__)
+server = app.server
 
 # Connect to postgres and import, clean data
 password_reporting_user = "plzanalyzeme69"
@@ -15,7 +16,7 @@ df = pd.read_sql_query(
     con=conn)
 
 # Layout
-application.layout = html.Div([
+app.layout = html.Div([
     html.H1("IT offers dashboards", style={'text-align': 'center'}),
 
     dcc.Dropdown(id="select-day",
@@ -33,7 +34,7 @@ application.layout = html.Div([
 ])
 
 
-@application.callback(
+@app.callback(
     [Output(component_id="it-offers-min-salary", component_property="figure"),
      Output(component_id="it-offers-max-salary", component_property="figure")],
     [Input(component_id="select-day", component_property="value")]
@@ -53,7 +54,7 @@ def update_graph(option_selected):
 
 
 if __name__ == "__main__":
-    application.run_server(debug=True, port=8080)
+    app.run_server(debug=True)
 
 
 
