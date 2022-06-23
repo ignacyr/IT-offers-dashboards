@@ -23,9 +23,10 @@ app.layout = html.Div([
                  options=[
                      {"label": "20-06-2022", "value": 20220620},
                      {"label": "21-06-2022", "value": 20220621},
-                     {"label": "22-06-2022", "value": 20220622}],
+                     {"label": "22-06-2022", "value": 20220622},
+                     {"label": "23-06-2022", "value": 20220623}],
                  multi=False,
-                 value=20220622,
+                 value=20220623,
                  style={"width": "40%"}),
 
     dcc.Graph(id="it-offers-salary", figure={}),
