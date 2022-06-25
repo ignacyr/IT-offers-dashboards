@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/dash-plotly-testing.iml" filepath="$PROJECT_DIR$/.idea/dash-plotly-testing.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/IT-offers-dashboards.iml" filepath="$PROJECT_DIR$/.idea/IT-offers-dashboards.iml" />
     </modules>
   </component>
 </project>
