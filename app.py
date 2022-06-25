@@ -18,14 +18,15 @@ conn = sqlalchemy.create_engine(
 max_date_int = pd.read_sql_query(sql="SELECT date FROM offers", con=conn)["date"].max()
 max_date_s = str(max_date_int)
 max_date_in_db = date(year=int(max_date_s[0:4]), month=int(max_date_s[4:6]), day=int(max_date_s[6:8]))
+min_date_in_db = date(2022, 6, 20)
 
 # Layout
 app.layout = html.Div([
-    html.H1("IT offers dashboards at specific date", style={'text-align': 'center'}),
+    html.H1("IT offers dashboards at a specific date - without salary higher than 75k", style={'text-align': 'center'}),
 
     dcc.DatePickerSingle(
         id='date-picker-single',
-        min_date_allowed=date(2022, 6, 20),
+        min_date_allowed=min_date_in_db,
         max_date_allowed=max_date_in_db,
         initial_visible_month=max_date_in_db,
         date=max_date_in_db,
@@ -35,9 +36,9 @@ app.layout = html.Div([
     dcc.Graph(id="it-offers-salary", figure={}),
     dcc.Graph(id="skills-pop", figure={}),
 
-    html.H1("IT offers inflation", style={'text-align': 'center'}),
+    html.H1("IT offers inflation - a median of offers salary", style={'text-align': 'center'}),
 
-    dcc.Graph(id="average-salary", figure={}),
+    dcc.Graph(id="average-salary", figure={})
 ])
 
 
@@ -65,7 +66,7 @@ def update_graph(date_dt):
     dff = dff[dff["date"] == date_int]
 
     # plotly express
-    salary_fig = px.histogram(dff[dff["max_salary"] < 100000], x="salary", nbins=100)  # throw away offers higher than 100k
+    salary_fig = px.histogram(dff[dff["salary"] < 75000], x="salary", nbins=100)  # throw away offers higher than 100k
     salary_fig.update_layout(bargap=0.1, xaxis_title_text='Salary', yaxis_title_text='Count',
                              title_text='Offered salary for IT specialists')
 
@@ -79,11 +80,11 @@ def update_graph(date_dt):
 
     # pie chart
     skills_pop_fig = px.pie(values=skills_count.values(), names=skills_count.keys(),
-                            title='Popularity of different skills',
-                            width=1200, height=800)
+                            title='Popularity of different skills', height=800)
+    skills_pop_fig.update_traces(textposition='inside', textinfo='percent+label')
 
     # avg salary
-    avg_salary_df = df.groupby("date")[["min_salary", "salary", "max_salary"]].mean()
+    avg_salary_df = df.groupby("date")[["min_salary", "salary", "max_salary"]].median()
     avg_salary_df["date"] = pd.to_datetime(avg_salary_df.index, format='%Y%m%d')
     avg_salary_fig = px.scatter(avg_salary_df, x="date", y="salary", trendline="lowess")
     avg_salary_fig.update_layout(xaxis_title_text="Day", yaxis_title_text="Salary")
