@@ -6,6 +6,7 @@ from dash.dependencies import Input, Output
 import pandas as pd
 import plotly.express as px
 import sqlalchemy
+from wordcloud import WordCloud
 
 app = Dash(__name__)
 server = app.server
@@ -20,6 +21,7 @@ max_date_s = str(max_date_int)
 max_date_in_db = date(year=int(max_date_s[0:4]), month=int(max_date_s[4:6]), day=int(max_date_s[6:8]))
 min_date_in_db = date(2022, 6, 20)
 
+app.title = "IT offers"
 # Layout
 app.layout = html.Div([
     html.H1("IT offers dashboards at a specific date - without salary higher than 75k", style={'text-align': 'center'}),
@@ -39,7 +41,10 @@ app.layout = html.Div([
 
     html.H1("IT offers inflation - a median of offers salary", style={'text-align': 'center'}),
 
-    dcc.Graph(id="average-salary", figure={})
+    dcc.Graph(id="average-salary", figure={}),
+
+    html.Img(src='assets/skills.png'),
+    html.Img(src='assets/categories.png')
 ])
 
 
@@ -125,6 +130,12 @@ def update_graph(date_dt):
 
     max_date_str = str(max_date)
     max_date_dt = date(year=int(max_date_str[0:4]), month=int(max_date_str[4:6]), day=int(max_date_str[6:8]))
+
+    skills_cloud = WordCloud(width=1000, height=500, background_color="white").generate(" ".join(skills))
+    skills_cloud.to_file("assets/skills.png")
+
+    categories_cloud = WordCloud(width=800, height=500, background_color="white").generate(" ".join(categories))
+    categories_cloud.to_file("assets/categories.png")
 
     return salary_fig, skills_pop_fig, categories_pop_fig, avg_salary_fig, max_date_dt
 
