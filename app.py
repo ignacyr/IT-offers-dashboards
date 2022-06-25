@@ -6,6 +6,7 @@ from dash.dependencies import Input, Output
 import pandas as pd
 import plotly.express as px
 import sqlalchemy
+import pandasql as ps
 from wordcloud import WordCloud
 
 app = Dash(__name__)
@@ -36,6 +37,7 @@ app.layout = html.Div([
     ),
 
     dcc.Graph(id="it-offers-salary", figure={}),
+    dcc.Graph(id="skills-salary", figure={}),
     dcc.Graph(id="skills-pop", figure={}),
     dcc.Graph(id="categories-pop", figure={}),
 
@@ -43,14 +45,15 @@ app.layout = html.Div([
 
     dcc.Graph(id="average-salary", figure={}),
 
-    html.Img(src='assets/skills.png'),
-    html.Img(src='assets/categories.png')
+    # html.Img(src='assets/skills.png'),
+    # html.Img(src='assets/categories.png')
 ])
 
 
 # Update graph
 @app.callback(
     [Output(component_id="it-offers-salary", component_property="figure"),
+     Output(component_id="skills-salary", component_property="figure"),
      Output(component_id="skills-pop", component_property="figure"),
      Output(component_id="categories-pop", component_property="figure"),
      Output(component_id="average-salary", component_property="figure"),
@@ -127,17 +130,26 @@ def update_graph(date_dt):
     avg_salary_fig = px.scatter(avg_salary_df, x="date", y="salary", trendline="lowess")
     avg_salary_fig.update_layout(xaxis_title_text="Day", yaxis_title_text="Salary")
     avg_salary_fig.update_xaxes(dtick="D1")
-
     max_date_str = str(max_date)
     max_date_dt = date(year=int(max_date_str[0:4]), month=int(max_date_str[4:6]), day=int(max_date_str[6:8]))
 
-    skills_cloud = WordCloud(width=1000, height=500, background_color="white").generate(" ".join(skills))
-    skills_cloud.to_file("assets/skills.png")
+    # word clouds
+    # skills_cloud = WordCloud(width=1000, height=500, background_color="white").generate(" ".join(skills))
+    # skills_cloud.to_file("assets/skills.png")
+    # categories_cloud = WordCloud(width=800, height=500, background_color="white").generate(" ".join(categories))
+    # categories_cloud.to_file("assets/categories.png")
 
-    categories_cloud = WordCloud(width=800, height=500, background_color="white").generate(" ".join(categories))
-    categories_cloud.to_file("assets/categories.png")
+    skill_salary = {}
+    for skill in set(skills):
+        if avg := ps.sqldf(f"select avg(salary) from dff where skills like '%{skill}%'")['avg(salary)'][0]:
+            skill_salary[skill] = avg
 
-    return salary_fig, skills_pop_fig, categories_pop_fig, avg_salary_fig, max_date_dt
+    skill_sal_fig = px.histogram(x=skill_salary.keys(), y=skill_salary.values(),
+                                 title='Average salary based on different skills')
+    skill_sal_fig.update_layout(xaxis_title_text='Skills', yaxis_title_text='Average salary')
+    skill_sal_fig.update_xaxes(categoryorder="total descending")
+
+    return salary_fig, skill_sal_fig, skills_pop_fig, categories_pop_fig, avg_salary_fig, max_date_dt
 
 
 if __name__ == "__main__":
