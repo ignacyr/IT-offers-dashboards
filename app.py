@@ -35,6 +35,7 @@ app.layout = html.Div([
 
     dcc.Graph(id="it-offers-salary", figure={}),
     dcc.Graph(id="skills-pop", figure={}),
+    dcc.Graph(id="categories-pop", figure={}),
 
     html.H1("IT offers inflation - a median of offers salary", style={'text-align': 'center'}),
 
@@ -46,6 +47,7 @@ app.layout = html.Div([
 @app.callback(
     [Output(component_id="it-offers-salary", component_property="figure"),
      Output(component_id="skills-pop", component_property="figure"),
+     Output(component_id="categories-pop", component_property="figure"),
      Output(component_id="average-salary", component_property="figure"),
      Output(component_id="date-picker-single", component_property="max_date_allowed")],
     [Input(component_id="date-picker-single", component_property="date")]
@@ -74,14 +76,45 @@ def update_graph(date_dt):
     skill_sets = dff.skills.apply(lambda x: x[1:-1].split(','))
     skills = [skill.replace("'", '').replace(' ', '') for skill_set in skill_sets for skill in skill_set]
     skills = [skill for skill in skills if skill]
-
     # count skills
     skills_count = dict(Counter(skills))
-
-    # pie chart
-    skills_pop_fig = px.pie(values=skills_count.values(), names=skills_count.keys(),
+    new_skill_count = {}
+    other_skills_count = 0
+    for k, v in skills_count.items():
+        if v >= 100:
+            new_skill_count[k] = v
+        else:
+            other_skills_count += v
+    if "other" in new_skill_count:
+        new_skill_count["other"] += other_skills_count
+    else:
+        new_skill_count["other"] = other_skills_count
+    # pie chart skills popularity
+    skills_pop_fig = px.pie(values=new_skill_count.values(), names=new_skill_count.keys(),
                             title='Popularity of different skills', height=800)
     skills_pop_fig.update_traces(textposition='inside', textinfo='percent+label')
+
+    # categories extraction from 'category' column
+    cat_sets = dff.category.apply(lambda x: x[1:-1].split(','))
+    categories = [cat.replace("'", '').replace(' ', '') for cat_set in cat_sets for cat in cat_set]
+    categories = [cat for cat in categories if cat]
+    # count categories
+    categories_count = dict(Counter(categories))
+    new_cat_count = {}
+    other_cat_count = 0
+    for k, v in categories_count.items():
+        if v >= 100:
+            new_cat_count[k] = v
+        else:
+            other_cat_count += v
+    if "other" in new_cat_count:
+        new_cat_count["other"] += other_cat_count
+    else:
+        new_cat_count["other"] = other_cat_count
+    # pie chart categories popularity
+    categories_pop_fig = px.pie(values=new_cat_count.values(), names=new_cat_count.keys(),
+                                title='Popularity of different categories', height=800)
+    categories_pop_fig.update_traces(textposition='inside', textinfo='percent+label')
 
     # avg salary
     avg_salary_df = df.groupby("date")[["min_salary", "salary", "max_salary"]].median()
@@ -93,7 +126,7 @@ def update_graph(date_dt):
     max_date_str = str(max_date)
     max_date_dt = date(year=int(max_date_str[0:4]), month=int(max_date_str[4:6]), day=int(max_date_str[6:8]))
 
-    return salary_fig, skills_pop_fig, avg_salary_fig, max_date_dt
+    return salary_fig, skills_pop_fig, categories_pop_fig, avg_salary_fig, max_date_dt
 
 
 if __name__ == "__main__":
