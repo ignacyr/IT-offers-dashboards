@@ -1,3 +1,3 @@
 # IT offers dashboards
 
-https://it-offers-v2.herokuapp.com/
+https://it-offers.herokuapp.com/
