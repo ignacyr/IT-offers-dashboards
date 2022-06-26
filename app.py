@@ -38,7 +38,6 @@ app.layout = html.Div([
 
     dcc.Graph(id="it-offers-salary", figure={}),
     dcc.Graph(id="skills-salary", figure={}),
-    dcc.Graph(id="cats-salary", figure={}),
     dcc.Graph(id="skills-pop", figure={}),
     dcc.Graph(id="categories-pop", figure={}),
 
@@ -55,7 +54,6 @@ app.layout = html.Div([
 @app.callback(
     [Output(component_id="it-offers-salary", component_property="figure"),
      Output(component_id="skills-salary", component_property="figure"),
-     Output(component_id="cats-salary", component_property="figure"),
      Output(component_id="skills-pop", component_property="figure"),
      Output(component_id="categories-pop", component_property="figure"),
      Output(component_id="average-salary", component_property="figure"),
@@ -153,17 +151,17 @@ def update_graph(date_dt):
     skill_sal_fig.update_xaxes(categoryorder="total descending")
 
     # histogram salary(category)
-    category_salary = {}
-    for cat in set(categories):
-        if avg := ps.sqldf(f"select avg(salary) from dff where category like '%{cat}%'")['avg(salary)'][0]:
-            category_salary[cat] = avg
+    # category_salary = {}
+    # for cat in set(categories):
+    #     if avg := ps.sqldf(f"select avg(salary) from dff where category like '%{cat}%'")['avg(salary)'][0]:
+    #         category_salary[cat] = avg
+    #
+    # cat_sal_fig = px.histogram(x=category_salary.keys(), y=category_salary.values(),
+    #                            title='Average salary based on different categories')
+    # cat_sal_fig.update_layout(xaxis_title_text='Skills', yaxis_title_text='Average salary')
+    # cat_sal_fig.update_xaxes(categoryorder="total descending")
 
-    cat_sal_fig = px.histogram(x=category_salary.keys(), y=category_salary.values(),
-                               title='Average salary based on different categories')
-    cat_sal_fig.update_layout(xaxis_title_text='Skills', yaxis_title_text='Average salary')
-    cat_sal_fig.update_xaxes(categoryorder="total descending")
-
-    return salary_fig, skill_sal_fig, cat_sal_fig, skills_pop_fig, categories_pop_fig, avg_salary_fig, max_date_dt
+    return salary_fig, skill_sal_fig, skills_pop_fig, categories_pop_fig, avg_salary_fig, max_date_dt
 
 
 if __name__ == "__main__":
