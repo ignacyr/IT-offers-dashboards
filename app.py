@@ -7,7 +7,7 @@ import pandas as pd
 import plotly.express as px
 import sqlalchemy
 import pandasql as ps
-from wordcloud import WordCloud
+# from wordcloud import WordCloud
 
 app = Dash(__name__)
 server = app.server
