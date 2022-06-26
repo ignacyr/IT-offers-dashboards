@@ -7,6 +7,8 @@ import pandas as pd
 import plotly.express as px
 import sqlalchemy
 import pandasql as ps
+import plotly.graph_objects as go
+
 # from wordcloud import WordCloud
 
 app = Dash(__name__)
@@ -38,6 +40,7 @@ app.layout = html.Div([
 
     dcc.Graph(id="it-offers-salary", figure={}),
     dcc.Graph(id="skills-salary", figure={}),
+    dcc.Graph(id="levels-salary", figure={}),
     dcc.Graph(id="skills-pop", figure={}),
     dcc.Graph(id="categories-pop", figure={}),
 
@@ -54,6 +57,7 @@ app.layout = html.Div([
 @app.callback(
     [Output(component_id="it-offers-salary", component_property="figure"),
      Output(component_id="skills-salary", component_property="figure"),
+     Output(component_id="levels-salary", component_property="figure"),
      Output(component_id="skills-pop", component_property="figure"),
      Output(component_id="categories-pop", component_property="figure"),
      Output(component_id="average-salary", component_property="figure"),
@@ -139,29 +143,25 @@ def update_graph(date_dt):
     # categories_cloud = WordCloud(width=800, height=500, background_color="white").generate(" ".join(categories))
     # categories_cloud.to_file("assets/categories.png")
 
-    # histogram salary(skills)
-    skill_salary = {}
+    skill_level_salary_df = pd.DataFrame(columns=['skill', 'level', 'salary'])
     for skill in set(skills):
-        if avg := ps.sqldf(f"select avg(salary) from dff where skills like '%{skill}%'")['avg(salary)'][0]:
-            skill_salary[skill] = avg
+        for level in ('trainee', 'junior', 'mid', 'senior', 'expert'):
+            if avg := ps.sqldf(f"select avg(salary) from dff where skills like '%{skill}%' and level like '%{level}%'")['avg(salary)'][0]:
+                skill_level_salary_df.loc[len(skill_level_salary_df)] = {'skill': skill, 'level': level, 'salary': avg}
+            else:
+                skill_level_salary_df.loc[len(skill_level_salary_df)] = {'skill': skill, 'level': level, 'salary': 100}
 
-    skill_sal_fig = px.histogram(x=skill_salary.keys(), y=skill_salary.values(),
-                                 title='Average salary based on different skills')
-    skill_sal_fig.update_layout(xaxis_title_text='Skills', yaxis_title_text='Average salary')
+    skill_sal_fig = px.histogram(skill_level_salary_df, x="skill", y="salary", barmode="group", color="level",
+                                 title='Average salary based on different skills, level')
+    skill_sal_fig.update_layout(xaxis_title_text='Skill, level', yaxis_title_text='Average salary')
     skill_sal_fig.update_xaxes(categoryorder="total descending")
 
-    # histogram salary(category)
-    # category_salary = {}
-    # for cat in set(categories):
-    #     if avg := ps.sqldf(f"select avg(salary) from dff where category like '%{cat}%'")['avg(salary)'][0]:
-    #         category_salary[cat] = avg
-    #
-    # cat_sal_fig = px.histogram(x=category_salary.keys(), y=category_salary.values(),
-    #                            title='Average salary based on different categories')
-    # cat_sal_fig.update_layout(xaxis_title_text='Skills', yaxis_title_text='Average salary')
-    # cat_sal_fig.update_xaxes(categoryorder="total descending")
+    level_sal_fig = px.histogram(skill_level_salary_df, x="level", y="salary", barmode="group", color="skill",
+                                 title='Average salary based on different levels, skills')
+    level_sal_fig.update_layout(xaxis_title_text='Level, skill', yaxis_title_text='Average salary')
+    level_sal_fig.update_xaxes(categoryorder="total descending")
 
-    return salary_fig, skill_sal_fig, skills_pop_fig, categories_pop_fig, avg_salary_fig, max_date_dt
+    return salary_fig, skill_sal_fig, level_sal_fig, skills_pop_fig, categories_pop_fig, avg_salary_fig, max_date_dt
 
 
 if __name__ == "__main__":
