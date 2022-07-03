@@ -27,7 +27,7 @@ min_date_in_db = date(2022, 6, 20)
 app.title = "IT offers"
 # Layout
 app.layout = html.Div([
-    html.H1("IT offers dashboards at a specific date - without salary higher than 75k", style={'text-align': 'center'}),
+    html.H1("Polish IT offers", style={'text-align': 'center'}),
 
     dcc.DatePickerSingle(
         id='date-picker-single',
@@ -44,7 +44,7 @@ app.layout = html.Div([
     dcc.Graph(id="skills-pop", figure={}),
     dcc.Graph(id="categories-pop", figure={}),
 
-    html.H1("IT offers inflation - a median of offers salary", style={'text-align': 'center'}),
+    html.H1("Polish IT salaries inflation", style={'text-align': 'center'}),
 
     dcc.Graph(id="average-salary", figure={}),
 
@@ -80,7 +80,7 @@ def update_graph(date_dt):
     dff = dff[dff["date"] == date_int]
 
     # plotly express
-    salary_fig = px.histogram(dff[dff["salary"] < 75000], x="salary", nbins=100)  # throw away offers higher than 100k
+    salary_fig = px.histogram(dff[dff["salary"] < 75000], x="salary", nbins=100)  # throw away offers higher than 75k
     salary_fig.update_layout(bargap=0.1, xaxis_title_text='Salary', yaxis_title_text='Count',
                              title_text='Offered salary for IT specialists')
 
