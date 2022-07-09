@@ -7,7 +7,6 @@ import pandas as pd
 import plotly.express as px
 import sqlalchemy
 import pandasql as ps
-import plotly.graph_objects as go
 
 # from wordcloud import WordCloud
 
