@@ -14,7 +14,7 @@ app = Dash(__name__)
 server = app.server
 
 # Connect to postgres and import, clean data
-password_reporting_user = "plzanalyzeme69"
+password_reporting_user = "********************"
 conn = sqlalchemy.create_engine(
     f"postgresql://reporting_user:{password_reporting_user}@it-offers.c9umk0ew1r8h.us-east-1.rds.amazonaws.com:5432/dwh")
 
